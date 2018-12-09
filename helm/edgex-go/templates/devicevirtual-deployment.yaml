@@ -1,0 +1,55 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: {{ .Values.edgex_device_virtual.name }}
+  name: {{ .Values.edgex_device_virtual.name }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        io.kompose.service: {{ .Values.edgex_device_virtual.name }}
+    spec:
+      containers:
+      - image: {{ .Values.deviceVirtualImage }}
+        name: {{ .Values.edgex_device_virtual.name }}
+        ports:
+        - containerPort: {{ .Values.edgex_device_virtual.port }}
+        resources: {}
+        volumeMounts:
+        - mountPath: {{ .Values.volumes.data_db.path }}
+          name: {{ .Values.volumes.data_db.name }}
+        - mountPath: {{ .Values.volumes.logs.path }}
+          name: {{ .Values.volumes.logs.name }}
+        - mountPath: {{ .Values.volumes.consul_config.path }}
+          name: {{ .Values.volumes.consul_config.name }}
+        - mountPath: {{ .Values.volumes.consul_data.path }}
+          name: {{ .Values.volumes.consul_data.name }}
+      restartPolicy: Always
+      volumes:
+      - name: {{ .Values.volumes.data_db.name }}
+        hostPath:
+          path: {{ .Values.volumes.data_db.path }}
+      - name: {{ .Values.volumes.logs.name }}
+        hostPath:
+          path: {{ .Values.volumes.logs.path }}
+      - name: {{ .Values.volumes.consul_config.name }}
+        hostPath:
+          path: {{ .Values.volumes.consul_config.path }}
+      - name: {{ .Values.volumes.consul_data.name }}
+        hostPath:
+          path: {{ .Values.volumes.consul_data.path }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.edgex_device_virtual.name }}
+  labels:
+    name: {{ .Values.edgex_device_virtual.name }}
+spec:
+  ports:
+    - port: {{ .Values.edgex_device_virtual.port }}
+  selector:
+    component: {{ .Values.edgex_device_virtual.name }}
+        
