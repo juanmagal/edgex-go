@@ -1,36 +1,36 @@
 package data
 
 import (
+	"bytes"
+	"github.com/edgexfoundry/edgex-go/pkg/clients/types"
+	"net/http"
+	"testing"
+
 	"github.com/edgexfoundry/edgex-go/internal/core/data/errors"
 	"github.com/edgexfoundry/edgex-go/pkg/models"
-	"testing"
 )
 
 func TestValidateFormatString(t *testing.T) {
-	match, err := validateFormatString(models.ValueDescriptor{Formatting: "%s"})
+	err := validateFormatString(models.ValueDescriptor{Formatting: "%s"})
 
-	if !match || err != nil {
+	if err != nil {
 		t.Errorf("Should match format specifier")
 	}
 }
 
 func TestValidateFormatStringEmpty(t *testing.T) {
-	match, err := validateFormatString(models.ValueDescriptor{Formatting: ""})
+	err := validateFormatString(models.ValueDescriptor{Formatting: ""})
 
-	if !match || err != nil {
+	if err != nil {
 		t.Errorf("Should match format specifier")
 	}
 }
 
 func TestValidateFormatStringInvalid(t *testing.T) {
-	match, err := validateFormatString(models.ValueDescriptor{Formatting: "error"})
+	err := validateFormatString(models.ValueDescriptor{Formatting: "error"})
 
-	if match {
-		t.Errorf("Should not match format specifier")
-	}
-
-	if err != nil {
-		t.Errorf("Unexpected error on invalid format string")
+	if err == nil {
+		t.Errorf("Expected error on invalid format string")
 	}
 }
 
@@ -262,8 +262,11 @@ func TestGetValueDescriptorsByDeviceNameNotFound(t *testing.T) {
 	_, err := getValueDescriptorsByDeviceName("404")
 
 	if err != nil {
-		switch err.(type) {
-		case *errors.ErrDbNotFound:
+		switch err := err.(type) {
+		case *types.ErrServiceClient:
+			if err.StatusCode != http.StatusNotFound {
+				t.Errorf("Expected a 404 error")
+			}
 			return
 		default:
 			t.Errorf("Unexpected error getting value descriptor by device name missing in DB")
@@ -304,8 +307,11 @@ func TestGetValueDescriptorsByDeviceIdNotFound(t *testing.T) {
 	_, err := getValueDescriptorsByDeviceId("404")
 
 	if err != nil {
-		switch err.(type) {
-		case *errors.ErrDbNotFound:
+		switch err := err.(type) {
+		case *types.ErrServiceClient:
+			if err.StatusCode != http.StatusNotFound {
+				t.Errorf("Expected a 404 error")
+			}
 			return
 		default:
 			t.Errorf("Unexpected error getting value descriptor by device id missing in DB")
@@ -442,5 +448,40 @@ func TestDeleteValueDescriptorError(t *testing.T) {
 
 	if err == nil {
 		t.Errorf("Expected error deleting value descriptor some error")
+	}
+}
+
+type closingBuffer struct {
+	*bytes.Buffer
+}
+
+func (cb *closingBuffer) Close() (err error) {
+	return nil
+}
+
+func TestDecodeValueDescriptorBadFormatting(t *testing.T) {
+	reset()
+	dbClient = newMockDb()
+
+	cb := &closingBuffer{bytes.NewBufferString(`{
+		"name": "co2",
+		"min": "12",
+		"max": "15",
+		"type": "F",
+		"uomLabel": "degreecel",
+		"defaultValue": "0",
+		"formatting": "%",
+		"labels": [
+			"NHCO2",
+		"hvac"
+	]
+	}`)}
+	_, err := decodeValueDescriptor(cb)
+
+	switch err.(type) {
+	case *errors.ErrValueDescriptorInvalid:
+		return
+	default:
+		t.Errorf("Expected an error of type *ErrValueDescriptorInvalid")
 	}
 }
