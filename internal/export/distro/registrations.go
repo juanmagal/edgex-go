@@ -81,6 +81,8 @@ func (reg *registrationInfo) update(newReg export.Registration) bool {
 		reg.format = thingsboardJSONFormatter{}
 	case export.FormatNOOP:
 		reg.format = noopFormatter{}
+	case export.FormatSenMLJSON:
+		reg.format = senMLJSONFormatter{}
 	default:
 		LoggingClient.Warn(fmt.Sprintf("Format not supported: %s", newReg.Format))
 		return false

@@ -47,6 +47,7 @@ const (
 	FormatCSV             = "CSV"
 	FormatThingsBoardJSON = "THINGSBOARD_JSON"
 	FormatNOOP            = "NOOP"
+	FormatSenMLJSON       = "SENML"
 )
 
 const (
@@ -102,8 +103,10 @@ func (reg Registration) Validate() (bool, error) {
 		reg.Format != FormatAWSJSON &&
 		reg.Format != FormatCSV &&
 		reg.Format != FormatThingsBoardJSON &&
-		reg.Format != FormatNOOP {
-		return false, fmt.Errorf("Format invalid: %s", reg.Format)
+		reg.Format != FormatNOOP &&
+		reg.Format != FormatSenMLJSON {
+
+			return false, fmt.Errorf("Format invalid: %s", reg.Format)
 	}
 
 	if reg.Destination != DestMQTT &&

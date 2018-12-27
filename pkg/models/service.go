@@ -16,6 +16,7 @@ package models
 
 import (
 	"encoding/json"
+
 	"github.com/globalsign/mgo/bson"
 )
 
