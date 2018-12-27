@@ -15,7 +15,6 @@ package interfaces
 
 import (
 	contract "github.com/edgexfoundry/edgex-go/pkg/models"
-	"github.com/globalsign/mgo/bson"
 )
 
 type DBClient interface {
@@ -43,13 +42,13 @@ type DBClient interface {
 	DeleteScheduleById(id string) error
 
 	// Device Report
-	GetAllDeviceReports(dr *[]contract.DeviceReport) error
-	GetDeviceReportByDeviceName(dr *[]contract.DeviceReport, n string) error
-	GetDeviceReportByName(dr *contract.DeviceReport, n string) error
-	GetDeviceReportById(dr *contract.DeviceReport, id string) error
-	AddDeviceReport(dr *contract.DeviceReport) error
-	UpdateDeviceReport(dr *contract.DeviceReport) error
-	GetDeviceReportsByScheduleEventName(dr *[]contract.DeviceReport, n string) error
+	GetAllDeviceReports() ([]contract.DeviceReport, error)
+	GetDeviceReportByDeviceName(n string) ([]contract.DeviceReport, error)
+	GetDeviceReportByName(n string) (contract.DeviceReport, error)
+	GetDeviceReportById(id string) (contract.DeviceReport, error)
+	AddDeviceReport(dr contract.DeviceReport) (string, error)
+	UpdateDeviceReport(dr contract.DeviceReport) error
+	GetDeviceReportsByScheduleEventName(n string) ([]contract.DeviceReport, error)
 	DeleteDeviceReportById(id string) error
 
 	// Device
@@ -76,15 +75,15 @@ type DBClient interface {
 	GetDeviceProfilesUsingCommand(dp *[]contract.DeviceProfile, c contract.Command) error
 
 	// Addressable
-	UpdateAddressable(ra *contract.Addressable, r *contract.Addressable) error
-	AddAddressable(a *contract.Addressable) (bson.ObjectId, error)
-	GetAddressableById(a *contract.Addressable, id string) error
-	GetAddressableByName(a *contract.Addressable, n string) error
-	GetAddressablesByTopic(a *[]contract.Addressable, t string) error
-	GetAddressablesByPort(a *[]contract.Addressable, p int) error
-	GetAddressablesByPublisher(a *[]contract.Addressable, p string) error
-	GetAddressablesByAddress(a *[]contract.Addressable, add string) error
-	GetAddressables(d *[]contract.Addressable) error
+	UpdateAddressable(a contract.Addressable) error
+	AddAddressable(a contract.Addressable) (string, error)
+	GetAddressableById(id string) (contract.Addressable, error)
+	GetAddressableByName(n string) (contract.Addressable, error)
+	GetAddressablesByTopic(t string) ([]contract.Addressable, error)
+	GetAddressablesByPort(p int) ([]contract.Addressable, error)
+	GetAddressablesByPublisher(p string) ([]contract.Addressable, error)
+	GetAddressablesByAddress(add string) ([]contract.Addressable, error)
+	GetAddressables() ([]contract.Addressable, error)
 	DeleteAddressableById(id string) error
 
 	// Device service
@@ -113,7 +112,7 @@ type DBClient interface {
 	GetCommandByName(c *[]contract.Command, id string) error
 	AddCommand(c *contract.Command) error
 	GetAllCommands(d *[]contract.Command) error
-	UpdateCommand(c *contract.Command, r *contract.Command) error
+	UpdateCommand(c *contract.Command) error
 	DeleteCommandById(id string) error
 
 	// Scrub all metadata (only used in test)

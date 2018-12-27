@@ -8,6 +8,7 @@ package test
 
 import (
 	"fmt"
+	"github.com/google/uuid"
 	"testing"
 
 	"github.com/edgexfoundry/edgex-go/internal/core/metadata/interfaces"
@@ -43,6 +44,8 @@ func TestMetadataDB(t *testing.T, db interfaces.DBClient) {
 func getAddressable(i int, prefix string) models.Addressable {
 	name := fmt.Sprintf("%sname%d", prefix, i)
 	a := models.Addressable{}
+
+	a.Id = uuid.New().String()
 	a.Name = name
 	a.Protocol = name
 	a.HTTPMethod = name
@@ -67,8 +70,8 @@ func getDeviceService(db interfaces.DBClient, i int) (models.DeviceService, erro
 	ds.LastConnected = 5
 	ds.LastReported = 5
 	ds.Description = name
-	var err error
-	_, err = db.AddAddressable(&ds.Addressable)
+
+	_, err := db.AddAddressable(ds.Addressable)
 	if err != nil {
 		return ds, fmt.Errorf("Error creating addressable: %v", err)
 	}
@@ -104,12 +107,12 @@ func getDeviceProfile(db interfaces.DBClient, i int) (models.DeviceProfile, erro
 	return dp, nil
 }
 
-func populateAddressable(db interfaces.DBClient, count int) (bson.ObjectId, error) {
-	var id bson.ObjectId
+func populateAddressable(db interfaces.DBClient, count int) (string, error) {
+	var id string
 	for i := 0; i < count; i++ {
 		var err error
 		a := getAddressable(i, "")
-		id, err = db.AddAddressable(&a)
+		id, err = db.AddAddressable(a)
 		if err != nil {
 			return id, err
 		}
@@ -168,8 +171,8 @@ func populateSchedule(db interfaces.DBClient, count int) (bson.ObjectId, error) 
 	return id, nil
 }
 
-func populateDeviceReport(db interfaces.DBClient, count int) (bson.ObjectId, error) {
-	var id bson.ObjectId
+func populateDeviceReport(db interfaces.DBClient, count int) (string, error) {
+	var id string
 	for i := 0; i < count; i++ {
 		var err error
 		name := fmt.Sprintf("name%d", i)
@@ -178,11 +181,10 @@ func populateDeviceReport(db interfaces.DBClient, count int) (bson.ObjectId, err
 		dr.Device = name
 		dr.Event = name
 		dr.Expected = append(dr.Expected, name)
-		err = db.AddDeviceReport(&dr)
+		id, err = db.AddDeviceReport(dr)
 		if err != nil {
 			return id, err
 		}
-		id = dr.Id
 	}
 	return id, nil
 }
@@ -198,7 +200,7 @@ func populateScheduleEvent(db interfaces.DBClient, count int) (bson.ObjectId, er
 		se.Parameters = name
 		se.Service = name
 		se.Addressable = getAddressable(i, "se_")
-		_, err = db.AddAddressable(&se.Addressable)
+		_, err = db.AddAddressable(se.Addressable)
 		if err != nil {
 			return id, fmt.Errorf("Error creating addressable: %v", err)
 		}
@@ -225,7 +227,7 @@ func populateDevice(db interfaces.DBClient, count int) (bson.ObjectId, error) {
 		d.Labels = append(d.Labels, name)
 
 		d.Addressable = getAddressable(i, "device")
-		_, err = db.AddAddressable(&d.Addressable)
+		_, err = db.AddAddressable(d.Addressable)
 		if err != nil {
 			return id, fmt.Errorf("Error creating addressable: %v", err)
 		}
@@ -308,13 +310,12 @@ func populateProvisionWatcher(db interfaces.DBClient, count int) (bson.ObjectId,
 }
 
 func clearAddressables(t *testing.T, db interfaces.DBClient) {
-	var addrs []models.Addressable
-	err := db.GetAddressables(&addrs)
+	addrs, err := db.GetAddressables()
 	if err != nil {
 		t.Fatalf("Error getting addressables %v", err)
 	}
 	for _, a := range addrs {
-		if err = db.DeleteAddressableById(a.Id.Hex()); err != nil {
+		if err = db.DeleteAddressableById(a.Id); err != nil {
 			t.Fatalf("Error removing addressable %v: %v", a, err)
 		}
 	}
@@ -373,13 +374,12 @@ func clearDeviceServices(t *testing.T, db interfaces.DBClient) {
 }
 
 func clearDeviceReports(t *testing.T, db interfaces.DBClient) {
-	var drs []models.DeviceReport
-	err := db.GetAllDeviceReports(&drs)
+	drs, err := db.GetAllDeviceReports()
 	if err != nil {
 		t.Fatalf("Error getting deviceReports %v", err)
 	}
 	for _, ds := range drs {
-		if err = db.DeleteDeviceReportById(ds.Id.Hex()); err != nil {
+		if err = db.DeleteDeviceReportById(ds.Id); err != nil {
 			t.Fatalf("Error removing deviceReport %v: %v", ds, err)
 		}
 	}
@@ -415,7 +415,7 @@ func testDBAddressables(t *testing.T, db interfaces.DBClient) {
 		t.Fatalf("Should not be able to add a duplicated addressable\n")
 	}
 
-	err = db.GetAddressables(&addrs)
+	addrs, err = db.GetAddressables()
 	if err != nil {
 		t.Fatalf("Error getting addressables %v", err)
 	}
@@ -423,30 +423,30 @@ func testDBAddressables(t *testing.T, db interfaces.DBClient) {
 		t.Fatalf("There should be 100 addressables instead of %d", len(addrs))
 	}
 	a := models.Addressable{}
-	err = db.GetAddressableById(&a, id.Hex())
+	a, err = db.GetAddressableById(id)
 	if err != nil {
 		t.Fatalf("Error getting addressable by id %v", err)
 	}
-	if a.Id.Hex() != id.Hex() {
+	if a.Id != id {
 		t.Fatalf("Id does not match %s - %s", a.Id, id)
 	}
-	err = db.GetAddressableById(&a, "INVALID")
+	a, err = db.GetAddressableById("INVALID")
 	if err == nil {
 		t.Fatalf("Addressable should not be found")
 	}
-	err = db.GetAddressableByName(&a, "name1")
+	a, err = db.GetAddressableByName("name1")
 	if err != nil {
 		t.Fatalf("Error getting addressable by name %v", err)
 	}
 	if a.Name != "name1" {
 		t.Fatalf("name does not match %s - %s", a.Name, "name1")
 	}
-	err = db.GetAddressableByName(&a, "INVALID")
+	a, err = db.GetAddressableByName("INVALID")
 	if err == nil {
 		t.Fatalf("Addressable should not be found")
 	}
 
-	err = db.GetAddressablesByTopic(&addrs, "name1")
+	addrs, err = db.GetAddressablesByTopic("name1")
 	if err != nil {
 		t.Fatalf("Error getting addressables by topic: %v", err)
 	}
@@ -454,7 +454,7 @@ func testDBAddressables(t *testing.T, db interfaces.DBClient) {
 		t.Fatalf("There should be 1 addressable, not %d", len(addrs))
 	}
 
-	err = db.GetAddressablesByTopic(&addrs, "INVALID")
+	addrs, err = db.GetAddressablesByTopic("INVALID")
 	if err != nil {
 		t.Fatalf("Error getting addressables by topic: %v", err)
 	}
@@ -462,7 +462,7 @@ func testDBAddressables(t *testing.T, db interfaces.DBClient) {
 		t.Fatalf("There should be no addressables, not %d", len(addrs))
 	}
 
-	err = db.GetAddressablesByPort(&addrs, 2)
+	addrs, err = db.GetAddressablesByPort(2)
 	if err != nil {
 		t.Fatalf("Error getting addressables by port: %v", err)
 	}
@@ -470,7 +470,7 @@ func testDBAddressables(t *testing.T, db interfaces.DBClient) {
 		t.Fatalf("There should be 1 addressable, not %d", len(addrs))
 	}
 
-	err = db.GetAddressablesByPort(&addrs, -1)
+	addrs, err = db.GetAddressablesByPort(-1)
 	if err != nil {
 		t.Fatalf("Error getting addressables by port: %v", err)
 	}
@@ -478,7 +478,7 @@ func testDBAddressables(t *testing.T, db interfaces.DBClient) {
 		t.Fatalf("There should be no addressables, not %d", len(addrs))
 	}
 
-	err = db.GetAddressablesByPublisher(&addrs, "name1")
+	addrs, err = db.GetAddressablesByPublisher("name1")
 	if err != nil {
 		t.Fatalf("Error getting addressables by publisher: %v", err)
 	}
@@ -486,7 +486,7 @@ func testDBAddressables(t *testing.T, db interfaces.DBClient) {
 		t.Fatalf("There should be 1 addressable, not %d", len(addrs))
 	}
 
-	err = db.GetAddressablesByPublisher(&addrs, "INVALID")
+	addrs, err = db.GetAddressablesByPublisher("INVALID")
 	if err != nil {
 		t.Fatalf("Error getting addressables by publisher: %v", err)
 	}
@@ -494,7 +494,7 @@ func testDBAddressables(t *testing.T, db interfaces.DBClient) {
 		t.Fatalf("There should be no addressables, not %d", len(addrs))
 	}
 
-	err = db.GetAddressablesByAddress(&addrs, "name1")
+	addrs, err = db.GetAddressablesByAddress("name1")
 	if err != nil {
 		t.Fatalf("Error getting addressables by Address: %v", err)
 	}
@@ -502,7 +502,7 @@ func testDBAddressables(t *testing.T, db interfaces.DBClient) {
 		t.Fatalf("There should be 1 addressable, not %d", len(addrs))
 	}
 
-	err = db.GetAddressablesByAddress(&addrs, "INVALID")
+	addrs, err = db.GetAddressablesByAddress("INVALID")
 	if err != nil {
 		t.Fatalf("Error getting addressables by Address: %v", err)
 	}
@@ -510,27 +510,25 @@ func testDBAddressables(t *testing.T, db interfaces.DBClient) {
 		t.Fatalf("There should be no addressables, not %d", len(addrs))
 	}
 
-	err = db.GetAddressableById(&a, id.Hex())
+	a, err = db.GetAddressableById(id)
 	if err != nil {
 		t.Fatalf("Error getting addressable %v", err)
 	}
-	err = db.GetAddressableByName(&a, "name1")
+	a, err = db.GetAddressableByName("name1")
 	if err != nil {
 		t.Fatalf("Error getting addressable %v", err)
 	}
 
-	aa := models.Addressable{}
-	aa.Id = id
-	aa.Name = "name"
-	err = db.UpdateAddressable(&aa, &a)
+	a.Name = "name"
+	err = db.UpdateAddressable(a)
 	if err != nil {
 		t.Fatalf("Error updating Addressable %v", err)
 	}
-	err = db.GetAddressableByName(&a, "name1")
+	a, err = db.GetAddressableByName("name1")
 	if err == nil {
 		t.Fatalf("Addressable name1 should be renamed")
 	}
-	err = db.GetAddressableByName(&a, "name")
+	a, err = db.GetAddressableByName("name")
 	if err != nil {
 		t.Fatalf("Addressable name should be renamed")
 	}
@@ -543,16 +541,16 @@ func testDBAddressables(t *testing.T, db interfaces.DBClient) {
 
 	a.Id = "INVALID"
 	a.Name = "INVALID"
-	err = db.DeleteAddressableById(a.Id.Hex())
+	err = db.DeleteAddressableById(a.Id)
 	if err == nil {
 		t.Fatalf("Addressable should not be deleted")
 	}
 
-	err = db.GetAddressableByName(&a, "name")
+	a, err = db.GetAddressableByName("name")
 	if err != nil {
 		t.Fatalf("Error getting addressable")
 	}
-	err = db.DeleteAddressableById(a.Id.Hex())
+	err = db.DeleteAddressableById(a.Id)
 	if err != nil {
 		t.Fatalf("Addressable should be deleted: %v", err)
 	}
@@ -613,18 +611,17 @@ func testDBCommand(t *testing.T, db interfaces.DBClient) {
 		t.Fatalf("There should be 1 commands instead of %d", len(commands))
 	}
 
-	cc := models.Command{}
-	cc.Id = id.Hex()
-	cc.Get = &models.Get{}
-	cc.Put = &models.Put{}
-	cc.Name = "name"
-	err = db.UpdateCommand(&cc, &c)
+	c.Id = id.Hex()
+	c.Get = &models.Get{}
+	c.Put = &models.Put{}
+	c.Name = "name"
+	err = db.UpdateCommand(&c)
 	if err != nil {
 		t.Fatalf("Error updating Command %v", err)
 	}
 
 	c.Id = "INVALID"
-	err = db.UpdateCommand(&cc, &c)
+	err = db.UpdateCommand(&c)
 	if err == nil {
 		t.Fatalf("Should return error")
 	}
@@ -644,6 +641,8 @@ func testDBDeviceService(t *testing.T, db interfaces.DBClient) {
 	var deviceServices []models.DeviceService
 
 	clearDeviceServices(t, db)
+	clearAddressables(t, db)
+
 	id, err := populateDeviceService(db, 100)
 	if err != nil {
 		t.Fatalf("Error populating db: %v\n", err)
@@ -689,7 +688,7 @@ func testDBDeviceService(t *testing.T, db interfaces.DBClient) {
 		t.Fatalf("There should be a not found error")
 	}
 
-	err = db.GetDeviceServicesByAddressableId(&deviceServices, ds.Addressable.Id.Hex())
+	err = db.GetDeviceServicesByAddressableId(&deviceServices, ds.Addressable.Id)
 	if err != nil {
 		t.Fatalf("Error getting deviceServices by addressable id %v", err)
 	}
@@ -829,12 +828,12 @@ func testDBDeviceReport(t *testing.T, db interfaces.DBClient) {
 
 	e := models.DeviceReport{}
 	e.Name = "name1"
-	err = db.AddDeviceReport(&e)
+	_, err = db.AddDeviceReport(e)
 	if err == nil {
 		t.Fatalf("Should be an error adding an existing name")
 	}
 
-	err = db.GetAllDeviceReports(&deviceReports)
+	deviceReports, err = db.GetAllDeviceReports()
 	if err != nil {
 		t.Fatalf("Error getting deviceReports %v", err)
 	}
@@ -842,31 +841,31 @@ func testDBDeviceReport(t *testing.T, db interfaces.DBClient) {
 		t.Fatalf("There should be 100 deviceReports instead of %d", len(deviceReports))
 	}
 
-	err = db.GetDeviceReportById(&e, id.Hex())
+	e, err = db.GetDeviceReportById(id)
 	if err != nil {
 		t.Fatalf("Error getting deviceReport by id %v", err)
 	}
-	if e.Id.Hex() != id.Hex() {
+	if e.Id != id {
 		t.Fatalf("Id does not match %s - %s", e.Id, id)
 	}
-	err = db.GetDeviceReportById(&e, "INVALID")
+	e, err = db.GetDeviceReportById("INVALID")
 	if err == nil {
 		t.Fatalf("DeviceReport should not be found")
 	}
 
-	err = db.GetDeviceReportByName(&e, "name1")
+	e, err = db.GetDeviceReportByName("name1")
 	if err != nil {
 		t.Fatalf("Error getting deviceReport by id %v", err)
 	}
 	if e.Name != "name1" {
 		t.Fatalf("Id does not match %s - %s", e.Id, id)
 	}
-	err = db.GetDeviceReportByName(&e, "INVALID")
+	e, err = db.GetDeviceReportByName("INVALID")
 	if err == nil {
 		t.Fatalf("DeviceReport should not be found")
 	}
 
-	err = db.GetDeviceReportByDeviceName(&deviceReports, "name1")
+	deviceReports, err = db.GetDeviceReportByDeviceName("name1")
 	if err != nil {
 		t.Fatalf("Error getting deviceReports %v", err)
 	}
@@ -874,7 +873,7 @@ func testDBDeviceReport(t *testing.T, db interfaces.DBClient) {
 		t.Fatalf("There should be 1 deviceReports instead of %d", len(deviceReports))
 	}
 
-	err = db.GetDeviceReportByDeviceName(&deviceReports, "name")
+	deviceReports, err = db.GetDeviceReportByDeviceName("name")
 	if err != nil {
 		t.Fatalf("Error getting deviceReports %v", err)
 	}
@@ -882,7 +881,7 @@ func testDBDeviceReport(t *testing.T, db interfaces.DBClient) {
 		t.Fatalf("There should be 0 deviceReports instead of %d", len(deviceReports))
 	}
 
-	err = db.GetDeviceReportsByScheduleEventName(&deviceReports, "name1")
+	deviceReports, err = db.GetDeviceReportsByScheduleEventName("name1")
 	if err != nil {
 		t.Fatalf("Error getting deviceReports %v", err)
 	}
@@ -890,7 +889,7 @@ func testDBDeviceReport(t *testing.T, db interfaces.DBClient) {
 		t.Fatalf("There should be 1 deviceReports instead of %d", len(deviceReports))
 	}
 
-	err = db.GetDeviceReportsByScheduleEventName(&deviceReports, "name")
+	deviceReports, err = db.GetDeviceReportsByScheduleEventName("name")
 	if err != nil {
 		t.Fatalf("Error getting deviceReports %v", err)
 	}
@@ -901,24 +900,24 @@ func testDBDeviceReport(t *testing.T, db interfaces.DBClient) {
 	e2 := models.DeviceReport{}
 	e2.Id = id
 	e2.Name = "name"
-	err = db.UpdateDeviceReport(&e2)
+	err = db.UpdateDeviceReport(e2)
 	if err != nil {
 		t.Fatalf("Error updating DeviceReport %v", err)
 	}
 
 	e2.Id = "INVALID"
-	err = db.UpdateDeviceReport(&e2)
+	err = db.UpdateDeviceReport(e2)
 	if err == nil {
 		t.Fatalf("Should return error")
 	}
 
-	err = db.DeleteDeviceReportById(e2.Id.Hex())
+	err = db.DeleteDeviceReportById(e2.Id)
 	if err == nil {
 		t.Fatalf("DeviceReport should not be deleted")
 	}
 
 	e2.Id = id
-	err = db.DeleteDeviceReportById(e2.Id.Hex())
+	err = db.DeleteDeviceReportById(e2.Id)
 	if err != nil {
 		t.Fatalf("DeviceReport should be deleted: %v", err)
 	}
@@ -995,7 +994,7 @@ func testDBScheduleEvent(t *testing.T, db interfaces.DBClient) {
 		t.Fatalf("There should be 0 ScheduleEvents instead of %d", len(scheduleEvents))
 	}
 
-	err = db.GetScheduleEventsByAddressableId(&scheduleEvents, e.Addressable.Id.Hex())
+	err = db.GetScheduleEventsByAddressableId(&scheduleEvents, e.Addressable.Id)
 	if err != nil {
 		t.Fatalf("Error getting ScheduleEvents %v", err)
 	}
@@ -1296,7 +1295,7 @@ func testDBDevice(t *testing.T, db interfaces.DBClient) {
 		t.Fatalf("There should be 0 devices instead of %d", len(devices))
 	}
 
-	err = db.GetDevicesByAddressableId(&devices, d.Addressable.Id.Hex())
+	err = db.GetDevicesByAddressableId(&devices, d.Addressable.Id)
 	if err != nil {
 		t.Fatalf("Error getting devices %v", err)
 	}
