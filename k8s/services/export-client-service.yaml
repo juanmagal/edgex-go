@@ -5,10 +5,12 @@ metadata:
     io.kompose.service: edgex-export-client
   name:  edgex-export-client
 spec:
+  type: NodePort
   ports:
   - name: "48071"
     port: 48071
     targetPort: 48071
+    nodePort: 30071
   selector:
     io.kompose.service: edgex-export-client
 status:

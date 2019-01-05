@@ -5,10 +5,12 @@ metadata:
     io.kompose.service: edgex-support-logging
   name: edgex-support-logging
 spec:
+  type: NodePort
   ports:
   - name: "48061"
     port: 48061
     targetPort: 48061
+    nodePort: 30061
   selector:
     io.kompose.service: edgex-support-logging
 status:

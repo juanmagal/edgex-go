@@ -1,21 +1,18 @@
-apiVersion: extensions/v1beta1
-kind: Deployment
+apiVersion: batch/v1
+kind: Job
 metadata:
   labels:
-    io.kompose.service: edgex-core-metadata
-  name: edgex-core-metadata
+    io.kompose.service: edgex-config-seed
+  name: edgex-config-seed
 spec:
-  replicas: 1
   template:
     metadata:
       labels:
-        io.kompose.service: edgex-core-metadata
+        io.kompose.service: edgex-config-seed
     spec:
       containers:
-      - image: juanman/docker-core-metadata-go:latest
-        name: edgex-core-metadata
-        ports:
-        - containerPort: 48081
+      - image: juanman/docker-core-config-seed-go:latest
+        name: edgex-config-seed
         resources: {}
         volumeMounts:
         - mountPath: /data/db
@@ -26,7 +23,7 @@ spec:
           name: consul-config
         - mountPath: /consul/data
           name: consul-data
-      restartPolicy: Always
+      restartPolicy: Never
       volumes:
       - name: data-db
         hostPath:
@@ -41,3 +38,4 @@ spec:
         hostPath:
           path: /consul/data
 status: {}
+

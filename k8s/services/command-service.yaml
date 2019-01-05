@@ -5,11 +5,11 @@ metadata:
     io.kompose.service: edgex-core-command
   name: edgex-core-command
 spec:
+  type: LoadBalancer
   ports:
   - name: "48082"
     port: 48082
-    targetPort: 48082
+#    targetPort: 48082
+#    nodePort: 30082
   selector:
     io.kompose.service: edgex-core-command
-status:
-  loadBalancer: {}

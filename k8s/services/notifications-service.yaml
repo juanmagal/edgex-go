@@ -5,10 +5,12 @@ metadata:
     io.kompose.service: edgex-support-notifications
   name: edgex-support-notifications
 spec:
+  type: NodePort
   ports:
   - name: "48060"
     port: 48060
     targetPort: 48060
+    nodePort: 30060
   selector:
     io.kompose.service: edgex-support-notifications
 status:

@@ -2,21 +2,21 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   labels:
-    io.kompose.service: edgex-device-bluetooth
-  name: edgex-device-bluetooth
+    io.kompose.service: edgex-device-mqtt
+  name: edgex-device-mqtt
 spec:
   replicas: 1
   template:
     metadata:
       creationTimestamp: null
       labels:
-        io.kompose.service: edgex-device-bluetooth
+        io.kompose.service: edgex-device-mqtt
     spec:
       containers:
-      - image: edgexfoundry/docker-device-bluetooth:0.2.1
-        name: edgex-device-bluetooth
+      - image: juanman/docker-device-mqtt-go:prueba2
+        name: edgex-device-mqtt
         ports:
-        - containerPort: 49988
+        - containerPort: 49982
         resources: {}
         securityContext:
           privileged: true

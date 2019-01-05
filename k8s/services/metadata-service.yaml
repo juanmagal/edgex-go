@@ -5,10 +5,12 @@ metadata:
     io.kompose.service: edgex-core-metadata
   name: edgex-core-metadata
 spec:
+  type: NodePort
   ports:
   - name: "48081"
     port: 48081
     targetPort: 48081
+    nodePort: 30081
   selector:
     io.kompose.service: edgex-core-metadata
 status:

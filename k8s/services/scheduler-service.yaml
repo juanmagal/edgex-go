@@ -5,10 +5,12 @@ metadata:
     io.kompose.service: edgex-support-scheduler
   name: edgex-support-scheduler
 spec:
+  type: NodePort
   ports:
   - name: "48085"
     port: 48085
     targetPort: 48085
+    nodePort: 30085
   selector:
     io.kompose.service: edgex-support-scheduler
 status:

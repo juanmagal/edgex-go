@@ -12,7 +12,7 @@ spec:
         io.kompose.service: edgex-core-command
     spec:
       containers:
-      - image: edgexfoundry/docker-core-command:0.2.1
+      - image: juanman/docker-core-command-go:latest
         name: edgex-core-command
         ports:
         - containerPort: 48082
@@ -40,4 +40,9 @@ spec:
       - name: consul-data
         hostPath:
           path: /consul/data
-status: {}
+      livenessProbe:
+        httpGet:
+          path: /api/v1/ping
+          port: 8180
+        initialDelaySeconds: 5
+        periodSeconds: 5

@@ -6,16 +6,20 @@ metadata:
   name: edgex-core-consul
 spec:
   ports:
-  - name: "8400"
+  - name: "server"
+    port: 8300
+    targetPort: 8300
+  - name: "rpc"
     port: 8400
     targetPort: 8400
-  - name: "8500"
+  - name: "https"
+    port: 8443
+    targetPort: 8443
+  - name: "http"
     port: 8500
     targetPort: 8500
-  - name: "8600"
+  - name: "consuldns"
     port: 8600
     targetPort: 8600
   selector:
     io.kompose.service: edgex-core-consul
-status:
-  loadBalancer: {}
