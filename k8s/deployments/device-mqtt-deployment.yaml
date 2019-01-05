@@ -43,4 +43,3 @@ spec:
       - name: consul-data
         hostPath:
           path: /consul/data
-status: {}

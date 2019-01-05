@@ -40,5 +40,9 @@ spec:
       - name: consul-data
         hostPath:
           path: /consul/data
-status: {}
-
+      livenessProbe:
+        httpGet:
+          path: /api/v1/ping
+          port: 48061
+        initialDelaySeconds: 5
+        periodSeconds: 5

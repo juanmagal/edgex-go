@@ -19,4 +19,3 @@ spec:
         - containerPort: 9001
         resources: {}
       restartPolicy: Always
-status: {}

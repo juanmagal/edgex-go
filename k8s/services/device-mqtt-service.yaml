@@ -11,5 +11,3 @@ spec:
     targetPort: 49982
   selector:
     io.kompose.service: edgex-device-mqtt
-status:
-  loadBalancer: {}

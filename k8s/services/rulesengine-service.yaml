@@ -5,13 +5,9 @@ metadata:
     io.kompose.service: edgex-support-rulesengine
   name: edgex-support-rulesengine
 spec:
-  type: NodePort
+  type: LoadBalancer
   ports:
   - name: "48075"
     port: 48075
-    targetPort: 48075
-    nodePort: 30075
   selector:
     io.kompose.service: edgex-support-rulesengine
-status:
-  loadBalancer: {}

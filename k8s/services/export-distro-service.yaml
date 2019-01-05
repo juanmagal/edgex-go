@@ -14,5 +14,3 @@ spec:
     targetPort: 5566
   selector:
     io.kompose.service: edgex-export-distro
-status:
-  loadBalancer: {}

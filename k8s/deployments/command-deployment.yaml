@@ -43,6 +43,6 @@ spec:
       livenessProbe:
         httpGet:
           path: /api/v1/ping
-          port: 8180
+          port: 48082
         initialDelaySeconds: 5
         periodSeconds: 5
