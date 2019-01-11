@@ -11,5 +11,3 @@ spec:
     targetPort: 27017
   selector:
     io.kompose.service: edgex-mongo
-status:
-  loadBalancer: {}

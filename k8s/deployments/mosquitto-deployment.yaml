@@ -1,0 +1,21 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: mosquitto
+  name: mosquitto
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        io.kompose.service: mosquitto
+    spec:
+      containers:
+      - image: eclipse-mosquitto
+        name: mosquitto
+        ports:
+        - containerPort: 1883
+        - containerPort: 9001
+        resources: {}
+      restartPolicy: Always

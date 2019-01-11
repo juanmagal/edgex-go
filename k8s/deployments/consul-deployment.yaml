@@ -12,12 +12,19 @@ spec:
         io.kompose.service: edgex-core-consul
     spec:
       containers:
-      - image: edgexfoundry/docker-core-consul:latest
+      - image: consul:1.1.0
         name: edgex-core-consul
         ports:
+        - containerPort: 8300
+          name: server
         - containerPort: 8400
+          name: alt-port
+        - containerPort: 8443
+          name: https-port
         - containerPort: 8500
+          name: ui-port
         - containerPort: 8600
+          name: consuldns
         resources: {}
         volumeMounts:
         - mountPath: /data/db

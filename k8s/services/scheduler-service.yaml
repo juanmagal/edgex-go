@@ -5,11 +5,9 @@ metadata:
     io.kompose.service: edgex-support-scheduler
   name: edgex-support-scheduler
 spec:
+  type: LoadBalancer
   ports:
   - name: "48085"
     port: 48085
-    targetPort: 48085
   selector:
     io.kompose.service: edgex-support-scheduler
-status:
-  loadBalancer: {}

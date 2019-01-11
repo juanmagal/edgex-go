@@ -5,11 +5,9 @@ metadata:
     io.kompose.service: edgex-support-logging
   name: edgex-support-logging
 spec:
+  type: LoadBalancer
   ports:
   - name: "48061"
     port: 48061
-    targetPort: 48061
   selector:
     io.kompose.service: edgex-support-logging
-status:
-  loadBalancer: {}

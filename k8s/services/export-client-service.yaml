@@ -5,11 +5,9 @@ metadata:
     io.kompose.service: edgex-export-client
   name:  edgex-export-client
 spec:
+  type: LoadBalancer
   ports:
   - name: "48071"
     port: 48071
-    targetPort: 48071
   selector:
     io.kompose.service: edgex-export-client
-status:
-  loadBalancer: {}
