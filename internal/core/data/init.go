@@ -129,20 +129,14 @@ func connectToDatabase() error {
 		return fmt.Errorf("couldn't create database client: %v", err.Error())
 	}
 
-	// Connect to the database
-	err = dbClient.Connect()
-	if err != nil {
-		dbClient = nil
-		return fmt.Errorf("couldn't connect to database: %v", err.Error())
-	}
-	return nil
+	return err
 }
 
 // Return the dbClient interface
 func newDBClient(dbType string, config db.Configuration) (interfaces.DBClient, error) {
 	switch dbType {
 	case db.MongoDB:
-		return mongo.NewClient(config), nil
+		return mongo.NewClient(config)
 	default:
 		return nil, db.ErrUnsupportedDatabase
 	}
@@ -179,7 +173,7 @@ func connectToConsul(conf *ConfigurationStruct) (*ConfigurationStruct, error) {
 	errCh := make(chan error)
 	dec := consulclient.NewConsulDecoder(conf.Registry)
 	dec.Target = &ConfigurationStruct{}
-	dec.Prefix = internal.ConfigV2Stem + internal.CoreDataServiceKey
+	dec.Prefix = internal.ConfigRegistryStem + internal.CoreDataServiceKey
 	dec.ErrCh = errCh
 	dec.UpdateCh = updateCh
 
@@ -211,8 +205,8 @@ func connectToConsul(conf *ConfigurationStruct) (*ConfigurationStruct, error) {
 func listenForConfigChanges() {
 	errCh := make(chan error)
 	dec := consulclient.NewConsulDecoder(Configuration.Registry)
-	dec.Target = &ConfigurationStruct{}
-	dec.Prefix = internal.ConfigV2Stem + internal.CoreDataServiceKey
+	dec.Target = &WritableInfo{}
+	dec.Prefix = internal.ConfigRegistryStem + internal.CoreDataServiceKey + internal.WritableKey
 	dec.ErrCh = errCh
 	dec.UpdateCh = chConfig
 
@@ -226,11 +220,11 @@ func listenForConfigChanges() {
 			LoggingClient.Error(ex.Error())
 		case raw, ok := <-chConfig:
 			if ok {
-				actual, ok := raw.(*ConfigurationStruct)
+				actual, ok := raw.(*WritableInfo)
 				if !ok {
 					LoggingClient.Error("listenForConfigChanges() type check failed")
 				}
-				Configuration = actual //Mutex needed?
+				Configuration.Writable = *actual
 			} else {
 				return
 			}

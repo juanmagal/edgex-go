@@ -20,8 +20,6 @@ import (
 type DBClient interface {
 	CloseSession()
 
-	Connect() error
-
 	// Schedule event
 	GetAllScheduleEvents(se *[]contract.ScheduleEvent) error
 	AddScheduleEvent(se *contract.ScheduleEvent) error
@@ -62,6 +60,8 @@ type DBClient interface {
 	GetDevicesWithLabel(d *[]contract.Device, l string) error
 	AddDevice(d *contract.Device) error
 	DeleteDeviceById(id string) error
+
+	// Device Profile
 	UpdateDeviceProfile(dp *contract.DeviceProfile) error
 	AddDeviceProfile(d *contract.DeviceProfile) error
 	GetAllDeviceProfiles(d *[]contract.DeviceProfile) error
@@ -88,12 +88,12 @@ type DBClient interface {
 
 	// Device service
 	UpdateDeviceService(ds contract.DeviceService) error
-	GetDeviceServicesByAddressableId(d *[]contract.DeviceService, id string) error
-	GetDeviceServicesWithLabel(d *[]contract.DeviceService, l string) error
-	GetDeviceServiceById(d *contract.DeviceService, id string) error
-	GetDeviceServiceByName(d *contract.DeviceService, n string) error
-	GetAllDeviceServices(d *[]contract.DeviceService) error
-	AddDeviceService(ds *contract.DeviceService) error
+	GetDeviceServicesByAddressableId(id string) ([]contract.DeviceService, error)
+	GetDeviceServicesWithLabel(l string) ([]contract.DeviceService, error)
+	GetDeviceServiceById(id string) (contract.DeviceService, error)
+	GetDeviceServiceByName(n string) (contract.DeviceService, error)
+	GetAllDeviceServices() ([]contract.DeviceService, error)
+	AddDeviceService(ds contract.DeviceService) (string, error)
 	DeleteDeviceServiceById(id string) error
 
 	// Provision watcher
@@ -108,10 +108,10 @@ type DBClient interface {
 	DeleteProvisionWatcherById(id string) error
 
 	// Command
-	GetCommandById(c *contract.Command, id string) error
-	GetCommandByName(c *[]contract.Command, id string) error
-	AddCommand(c *contract.Command) error
-	GetAllCommands(d *[]contract.Command) error
+	GetCommandById(id string) (contract.Command, error)
+	GetCommandByName(id string) ([]contract.Command, error)
+	AddCommand(c contract.Command) (string, error)
+	GetAllCommands() ([]contract.Command, error)
 	UpdateCommand(c *contract.Command) error
 	DeleteCommandById(id string) error
 

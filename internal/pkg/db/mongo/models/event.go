@@ -16,10 +16,9 @@ package models
 import (
 	"github.com/edgexfoundry/edgex-go/internal/pkg/db"
 	contract "github.com/edgexfoundry/edgex-go/pkg/models"
-	"github.com/google/uuid"
-	"github.com/pkg/errors"
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
+	"github.com/pkg/errors"
 )
 
 type Event struct {
@@ -35,7 +34,7 @@ type Event struct {
 	dbRefs   []mgo.DBRef
 }
 
-func (e Event) ToContract() contract.Event {
+func (e *Event) ToContract() contract.Event {
 	// Always hand back the UUID as the contract event ID unless it's blank (an old event, for example blackbox test scripts
 	id := e.Uuid
 	if id == "" {
@@ -58,25 +57,10 @@ func (e Event) ToContract() contract.Event {
 }
 
 func (e *Event) FromContract(from contract.Event) error {
-	// In this first case, ID is empty so this must be an add.
-	// Generate new BSON/UUIDs
-	if from.ID == "" {
-		e.Id = bson.NewObjectId()
-		e.Uuid = uuid.New().String()
-	} else {
-		// In this case, we're dealing with an existing event
-		if !bson.IsObjectIdHex(from.ID) {
-			// EventID is not a BSON ID. Is it a UUID?
-			_, err := uuid.Parse(from.ID)
-			if err != nil { // It is some unsupported type of string
-				return db.ErrInvalidObjectId
-			}
-			// Leave model's ID blank for now. We will be querying based on the UUID.
-			e.Uuid = from.ID
-		} else {
-			// ID of pre-existing event is a BSON ID. We will query using the BSON ID.
-			e.Id = bson.ObjectIdHex(from.ID)
-		}
+	var err error
+	e.Id, e.Uuid, err = fromContractId(from.ID)
+	if err != nil {
+		return err
 	}
 
 	e.Pushed = from.Pushed
@@ -103,11 +87,13 @@ func (e *Event) FromContract(from contract.Event) error {
 }
 
 // Custom marshaling into mongo
-func (e Event) GetBSON() (interface{}, error) {
+func (e *Event) GetBSON() (interface{}, error) {
 	// Turn the readings into DBRef objects
 	var readings []mgo.DBRef
 	for _, reading := range e.Readings {
-		readings = append(readings, mgo.DBRef{Collection: db.ReadingsCollection, Id: reading.Id})
+		if reading.Id.Valid() {
+			readings = append(readings, mgo.DBRef{Collection: db.ReadingsCollection, Id: reading.Id})
+		}
 	}
 
 	return struct {
@@ -120,7 +106,7 @@ func (e Event) GetBSON() (interface{}, error) {
 		Origin   int64         `bson:"origin"`
 		Schedule string        `bson:"schedule,omitempty"` // Schedule identifier
 		Event    string        `bson:"event"`              // Schedule event identifier
-		Readings []mgo.DBRef   `bson:"readings"`           // List of readings
+		Readings []mgo.DBRef   `bson:"readings,omitempty"` // List of readings
 	}{
 		ID:       e.Id,
 		Uuid:     e.Uuid,
@@ -180,7 +166,7 @@ func (e *Event) SetBSON(raw bson.Raw) error {
 // In order to fully separate the database access and state concerns, I have to provide a getter
 // for the internal list of DBRefs. I do not want to pollute the property-based signature of the
 // mongo/model/event type.
-func (e Event) GetDBRefs() []mgo.DBRef {
+func (e *Event) GetDBRefs() []mgo.DBRef {
 	if e.dbRefs == nil {
 		return []mgo.DBRef{}
 	}

@@ -16,6 +16,7 @@ package clients
 const ClientMonitorDefault = 15000
 
 const (
+	ApiBase                    = "/api/v1"
 	ApiAddressableRoute        = "/api/v1/addressable"
 	ApiCallbackRoute           = "/api/v1/callback"
 	ApiCommandRoute            = "/api/v1/command"
@@ -38,4 +39,6 @@ const (
 	ApiSubscriptionRoute       = "/api/v1/subscription"
 	ApiTransmissionRoute       = "/api/v1/transmission"
 	ApiValueDescriptorRoute    = "/api/v1/valuedescriptor"
+	ApiIntervalRoute           = "/api/v1/interval"
+	ApiIntervalActionRoute     = "/api/v1/intervalaction"
 )

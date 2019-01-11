@@ -16,9 +16,14 @@ package models
 import (
 	"github.com/edgexfoundry/edgex-go/internal/pkg/db"
 	contract "github.com/edgexfoundry/edgex-go/pkg/models"
+	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
-	"github.com/google/uuid"
 )
+
+type addressableTransform interface {
+	DBRefToAddressable(dbRef mgo.DBRef) (a Addressable, err error)
+	AddressableToDBRef(a Addressable) (dbRef mgo.DBRef, err error)
+}
 
 type Addressable struct {
 	Id         bson.ObjectId `bson:"_id,omitempty"`
@@ -38,7 +43,7 @@ type Addressable struct {
 	Origin     int64         `bson:"origin"`
 }
 
-func (a Addressable) ToContract() contract.Addressable {
+func (a *Addressable) ToContract() contract.Addressable {
 	// Always hand back the UUID as the contract event ID unless it's blank (an old event, for example blackbox test scripts
 	id := a.Uuid
 	if id == "" {
@@ -65,26 +70,12 @@ func (a Addressable) ToContract() contract.Addressable {
 }
 
 func (a *Addressable) FromContract(from contract.Addressable) error {
-	// In this first case, ID is empty so this must be an add.
-	// Generate new BSON/UUIDs
-	if from.Id == "" {
-		a.Id = bson.NewObjectId()
-		a.Uuid = uuid.New().String()
-	} else {
-		// In this case, we're dealing with an existing event
-		if !bson.IsObjectIdHex(from.Id) {
-			// EventID is not a BSON ID. Is it a UUID?
-			_, err := uuid.Parse(from.Id)
-			if err != nil { // It is some unsupported type of string
-				return db.ErrInvalidObjectId
-			}
-			// Leave model's ID blank for now. We will be querying based on the UUID.
-			a.Uuid = from.Id
-		} else {
-			// ID of pre-existing event is a BSON ID. We will query using the BSON ID.
-			a.Id = bson.ObjectIdHex(from.Id)
-		}
+	var err error
+	a.Id, a.Uuid, err = fromContractId(from.Id)
+	if err != nil {
+		return err
 	}
+
 	a.Name = from.Name
 	a.Protocol = from.Protocol
 	a.HTTPMethod = from.HTTPMethod

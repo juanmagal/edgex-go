@@ -21,7 +21,7 @@ import (
 // Update when the device was last reported connected
 func updateDeviceLastReportedConnected(device string) {
 	// Config set to skip update last reported
-	if !Configuration.DeviceUpdateLastConnected {
+	if !Configuration.Writable.DeviceUpdateLastConnected {
 		LoggingClient.Debug("Skipping update of device connected/reported times for:  " + device)
 		return
 	}
@@ -54,7 +54,7 @@ func updateDeviceLastReportedConnected(device string) {
 
 // Update when the device service was last reported connected
 func updateDeviceServiceLastReportedConnected(device string) {
-	if !Configuration.ServiceUpdateLastConnected {
+	if !Configuration.Writable.ServiceUpdateLastConnected {
 		LoggingClient.Debug("Skipping update of device service connected/reported times for:  " + device)
 		return
 	}
@@ -81,10 +81,9 @@ func updateDeviceServiceLastReportedConnected(device string) {
 		return
 	}
 
-	msc.UpdateLastConnected(s.Service.Id.Hex(), t)
-	msc.UpdateLastReported(s.Service.Id.Hex(), t)
+	msc.UpdateLastConnected(s.Service.Id, t)
+	msc.UpdateLastReported(s.Service.Id, t)
 }
-
 
 func checkMaxLimit(limit int) error {
 	if limit > Configuration.Service.ReadMaxLimit {
@@ -96,7 +95,7 @@ func checkMaxLimit(limit int) error {
 }
 
 func checkDevice(device string) error {
-	if Configuration.MetaDataCheck {
+	if Configuration.Writable.MetaDataCheck {
 		_, err := mdc.CheckForDevice(device)
 		if err != nil {
 			return err

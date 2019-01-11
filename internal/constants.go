@@ -14,12 +14,10 @@
 package internal
 
 const (
-	ApiConfigRoute       = "/api/v1/config"
-	ApiPingRoute         = "/api/v1/ping"
 	BootTimeoutDefault   = 30000
 	ClientMonitorDefault = 15000
 	ConfigFileName       = "configuration.toml"
-	ConfigV2Stem         = "config/V2/"
+	ConfigRegistryStem   = "edgex/core/1.0/"
 )
 
 const (
@@ -34,4 +32,5 @@ const (
 	SupportNotificationsServiceKey  = "edgex-support-notifications"
 	SystemManagementAgentServiceKey = "edgex-sys-mgmt-agent"
 	SupportSchedulerServiceKey      = "edgex-support-scheduler"
+	WritableKey                     = "/Writable"
 )
