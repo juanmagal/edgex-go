@@ -29,17 +29,19 @@ import (
 )
 
 func restGetAllDevices(w http.ResponseWriter, _ *http.Request) {
-	res := make([]models.Device, 0)
-	err := dbClient.GetAllDevices(&res)
-	if err != nil {
+
+	res := []models.Device{}
+	if err := dbClient.GetAllDevices(&res); err != nil {
 		LoggingClient.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	LoggingClient.Info(fmt.Sprintf("Retrieving devices %c", len(res)))
+
 
 	// Check the max length
 	if len(res) > Configuration.Service.ReadMaxLimit {
-		err = errors.New("Max limit exceeded")
+		err := errors.New("Max limit exceeded")
 		LoggingClient.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusRequestEntityTooLarge)
 		return
@@ -78,7 +80,7 @@ func restAddNewDevice(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	d.Addressable = addressable
-
+	
 	// Service Check
 	// Try by name
 	service, err := dbClient.GetDeviceServiceByName(d.Service.Service.Name)
@@ -496,6 +498,8 @@ func restGetDeviceById(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	var did string = vars[ID]
 	var res models.Device
+	LoggingClient.Info(fmt.Sprintf("Device: %s",did))
+
 	if err := dbClient.GetDeviceById(&res, did); err != nil {
 		LoggingClient.Error(err.Error())
 		if err == db.ErrNotFound {

@@ -314,6 +314,7 @@ func (m MongoClient) DeleteDeviceReportById(id string) error {
 
 /* ----------------------------- Device ---------------------------------- */
 func (m MongoClient) AddDevice(d *contract.Device) error {
+
 	s := m.session.Copy()
 	defer s.Close()
 	col := s.DB(m.database.Name).C(db.Device)
@@ -335,6 +336,7 @@ func (m MongoClient) AddDevice(d *contract.Device) error {
 	if err != nil {
 		return err
 	}
+
 	d.Addressable.Id = addr.Id.Hex()
 
 	// Wrap the device in MongoDevice (For DBRefs)
@@ -431,6 +433,7 @@ func (m MongoClient) GetDevices(d *[]contract.Device, q bson.M) error {
 	if err != nil {
 		return err
 	}
+
 
 	*d = []contract.Device{}
 	for _, md := range mds {
@@ -857,6 +860,7 @@ func (m MongoClient) getDeviceService(q bson.M) (contract.DeviceService, error) 
 	}
 	return ds.ToContract(m)
 }
+
 
 func (m MongoClient) AddDeviceService(ds contract.DeviceService) (string, error) {
 	s := m.session.Copy()

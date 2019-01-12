@@ -109,9 +109,9 @@ func (md *mongoDevice) SetBSON(raw bson.Raw) error {
 
 	var a models.Addressable
 	var mdp mongoDeviceProfile
-	var ds models.DeviceService
+    var ds models.DeviceService
 
-	err = addCol.Find(bson.M{"_id": decoded.Addressable.Id}).One(&a)
+	err = addCol.Find(bson.M{"_id": bson.ObjectIdHex(decoded.Addressable.Id.(string))}).One(&a)
 	if err == mgo.ErrNotFound {
 		err = addCol.Find(bson.M{"uuid": decoded.Addressable.Id}).One(&a)
 	}
@@ -119,10 +119,11 @@ func (md *mongoDevice) SetBSON(raw bson.Raw) error {
 		return err
 	}
 
-	err = dsCol.Find(bson.M{"_id": decoded.Service.Id}).One(&ds)
+	err = dsCol.Find(bson.M{"_id": bson.ObjectIdHex(decoded.Service.Id.(string))}).One(&ds)
 	if err != nil {
 		return err
 	}
+
 	err = dpCol.Find(bson.M{"_id": decoded.Profile.Id}).One(&mdp)
 	if err != nil {
 		return err
@@ -131,5 +132,6 @@ func (md *mongoDevice) SetBSON(raw bson.Raw) error {
 	md.Addressable = a.ToContract()
 	md.Profile = mdp.DeviceProfile
 	md.Service, err = ds.ToContract(m)
+
 	return err
 }
