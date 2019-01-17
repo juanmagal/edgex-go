@@ -73,7 +73,7 @@ func (c *Command) ToContract() contract.Command {
 func (c *Command) FromContract(from contract.Command) (contractId string, err error) {
 	c.Id, c.Uuid, err = fromContractId(from.Id)
 	if err != nil {
-		return
+		return 
 	}
 
 	c.Name = from.Name
@@ -82,18 +82,18 @@ func (c *Command) FromContract(from contract.Command) (contractId string, err er
 
 	if (from.Get !=nil) {
 		// There is get command
-		err := c.Get.FromContract(*from.Get)
+		err = c.Get.FromContract(*from.Get)
 		if err != nil {
-			return err
+			return 
 		}
 	}
 
 	c.Put = &Put{}
 	if (from.Put !=nil) {
 		// There is put command
-		err := c.Put.FromContract(*from.Put)
+		err = c.Put.FromContract(*from.Put)
 		if err != nil {
-			return err
+			return 
 		}
 	}
 
