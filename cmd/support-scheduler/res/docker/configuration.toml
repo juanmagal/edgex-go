@@ -1,4 +1,6 @@
+[Writable]
 ScheduleIntervalTime = 500
+LogLevel = 'INFO'
 
 [Service]
 BootTimeout = 30000

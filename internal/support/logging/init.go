@@ -162,7 +162,8 @@ func listenForConfigChanges() {
 				if !ok {
 					LoggingClient.Error("listenForConfigChanges() type check failed")
 				}
-				Configuration = actual //Mutex needed?
+				Configuration.Writable = actual.Writable
+				LoggingClient.SetLogLevel(Configuration.Writable.LogLevel)
 			} else {
 				return
 			}
@@ -171,7 +172,7 @@ func listenForConfigChanges() {
 }
 
 func getPersistence() error {
-	switch Configuration.Persistence {
+	switch Configuration.Writable.Persistence {
 	case PersistenceFile:
 		dbClient = &fileLog{filename: Configuration.Logging.File}
 	case PersistenceDB:
@@ -183,7 +184,7 @@ func getPersistence() error {
 			dbClient = &mongoLog{session: ms}
 		}
 	default:
-		return errors.New(fmt.Sprintf("unrecognized value Configuration.Persistence: %s", Configuration.Persistence))
+		return errors.New(fmt.Sprintf("unrecognized value Configuration.Persistence: %s", Configuration.Writable.Persistence))
 	}
 	return nil
 }

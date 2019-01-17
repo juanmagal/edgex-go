@@ -17,8 +17,14 @@ package models
 import (
 	"github.com/edgexfoundry/edgex-go/internal/pkg/db"
 	contract "github.com/edgexfoundry/edgex-go/pkg/models"
+	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 )
+
+type commandTransform interface {
+	DBRefToCommand(dbRef mgo.DBRef) (c Command, err error)
+	CommandToDBRef(c Command) (dbRef mgo.DBRef, err error)
+}
 
 type Command struct {
 	Id       bson.ObjectId `bson:"_id,omitempty"`
@@ -64,11 +70,10 @@ func (c *Command) ToContract() contract.Command {
 	return to
 }
 
-func (c *Command) FromContract(from contract.Command) error {
-	var err error
+func (c *Command) FromContract(from contract.Command) (contractId string, err error) {
 	c.Id, c.Uuid, err = fromContractId(from.Id)
 	if err != nil {
-		return err
+		return
 	}
 
 	c.Name = from.Name
@@ -100,5 +105,5 @@ func (c *Command) FromContract(from contract.Command) error {
 		c.Created = db.MakeTimestamp()
 	}
 
-	return nil
+	return toContractId(c.Id, c.Uuid), nil
 }

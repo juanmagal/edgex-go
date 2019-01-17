@@ -19,7 +19,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/edgexfoundry/edgex-go/internal/export"
 	"github.com/edgexfoundry/edgex-go/pkg/models"
 )
 
@@ -32,14 +31,14 @@ var registrationChanges chan models.NotifyUpdate = make(chan models.NotifyUpdate
 
 // RegistrationInfo - registration info
 type registrationInfo struct {
-	registration export.Registration
+	registration models.Registration
 	format       formatter
 	compression  transformer
 	encrypt      transformer
 	sender       sender
 	filter       []filterer
 
-	chRegistration chan *export.Registration
+	chRegistration chan *models.Registration
 	chEvent        chan *models.Event
 
 	deleteFlag bool
@@ -53,33 +52,33 @@ func RefreshRegistrations(update models.NotifyUpdate) {
 func newRegistrationInfo() *registrationInfo {
 	reg := &registrationInfo{}
 
-	reg.chRegistration = make(chan *export.Registration)
+	reg.chRegistration = make(chan *models.Registration)
 	reg.chEvent = make(chan *models.Event)
 	return reg
 }
 
-func (reg *registrationInfo) update(newReg export.Registration) bool {
+func (reg *registrationInfo) update(newReg models.Registration) bool {
 	reg.registration = newReg
 
 	reg.format = nil
 	switch newReg.Format {
-	case export.FormatJSON:
+	case models.FormatJSON:
 		reg.format = jsonFormatter{}
-	case export.FormatXML:
+	case models.FormatXML:
 		reg.format = xmlFormatter{}
-	case export.FormatSerialized:
+	case models.FormatSerialized:
 		reg.format = jsonFormatter{}
-	case export.FormatIoTCoreJSON:
+	case models.FormatIoTCoreJSON:
 		reg.format = jsonFormatter{}
-	case export.FormatAzureJSON:
+	case models.FormatAzureJSON:
 		reg.format = azureFormatter{}
-	case export.FormatAWSJSON:
+	case models.FormatAWSJSON:
 		reg.format = awsFormatter{}
-	case export.FormatCSV:
+	case models.FormatCSV:
 		// TODO reg.format = distro.NewCsvFormat()
-	case export.FormatThingsBoardJSON:
+	case models.FormatThingsBoardJSON:
 		reg.format = thingsboardJSONFormatter{}
-	case export.FormatNOOP:
+	case models.FormatNOOP:
 		reg.format = noopFormatter{}
 	case export.FormatSenMLJSON:
 		reg.format = senMLJSONFormatter{}
@@ -92,11 +91,11 @@ func (reg *registrationInfo) update(newReg export.Registration) bool {
 	switch newReg.Compression {
 	case "":
 		fallthrough
-	case export.CompNone:
+	case models.CompNone:
 		reg.compression = nil
-	case export.CompGzip:
+	case models.CompGzip:
 		reg.compression = &gzipTransformer{}
-	case export.CompZip:
+	case models.CompZip:
 		reg.compression = &zlibTransformer{}
 	default:
 		LoggingClient.Warn(fmt.Sprintf("Compression not supported: %s", newReg.Compression))
@@ -105,25 +104,25 @@ func (reg *registrationInfo) update(newReg export.Registration) bool {
 
 	reg.sender = nil
 	switch newReg.Destination {
-	case export.DestMQTT, export.DestAzureMQTT:
+	case models.DestMQTT, models.DestAzureMQTT:
 		c := Configuration.Certificates["MQTTS"]
 		reg.sender = newMqttSender(newReg.Addressable, c.Cert, c.Key)
-	case export.DestAWSMQTT:
+	case models.DestAWSMQTT:
 		newReg.Addressable.Protocol = "tls"
 		newReg.Addressable.Path = ""
 		newReg.Addressable.Topic = fmt.Sprintf(awsThingUpdateTopic, newReg.Addressable.Topic)
 		newReg.Addressable.Port = awsMQTTPort
 		c := Configuration.Certificates["AWS"]
 		reg.sender = newMqttSender(newReg.Addressable, c.Cert, c.Key)
-	case export.DestZMQ:
+	case models.DestZMQ:
 		reg.sender = newZeroMQEventPublisher()
-	case export.DestIotCoreMQTT:
+	case models.DestIotCoreMQTT:
 		reg.sender = newIoTCoreSender(newReg.Addressable)
-	case export.DestRest:
+	case models.DestRest:
 		reg.sender = newHTTPSender(newReg.Addressable)
-	case export.DestXMPP:
+	case models.DestXMPP:
 		reg.sender = newXMPPSender(newReg.Addressable)
-	case export.DestInfluxDB:
+	case models.DestInfluxDB:
 		reg.sender = newInfluxDBSender(newReg.Addressable)
 
 	default:
@@ -139,9 +138,9 @@ func (reg *registrationInfo) update(newReg export.Registration) bool {
 	switch newReg.Encryption.Algo {
 	case "":
 		fallthrough
-	case export.EncNone:
+	case models.EncNone:
 		reg.encrypt = nil
-	case export.EncAes:
+	case models.EncAes:
 		reg.encrypt = newAESEncryption(newReg.Encryption)
 	default:
 		LoggingClient.Warn(fmt.Sprintf("Encryption not supported: %s", newReg.Encryption.Algo))
@@ -191,7 +190,7 @@ func (reg registrationInfo) processEvent(event *models.Event) {
 		encrypted = reg.encrypt.Transform(compressed)
 	}
 
-	if reg.sender.Send(encrypted, event) && Configuration.MarkPushed {
+	if reg.sender.Send(encrypted, event) && Configuration.Writable.MarkPushed {
 		id := event.ID
 		err := ec.MarkPushed(id)
 
@@ -231,7 +230,7 @@ func updateRunningRegistrations(running map[string]*registrationInfo,
 	update models.NotifyUpdate) error {
 
 	switch update.Operation {
-	case export.NotifyUpdateDelete:
+	case models.NotifyUpdateDelete:
 		for k, v := range running {
 			if k == update.Name {
 				v.chRegistration <- nil
@@ -240,7 +239,7 @@ func updateRunningRegistrations(running map[string]*registrationInfo,
 			}
 		}
 		return fmt.Errorf("delete update not processed")
-	case export.NotifyUpdateUpdate:
+	case models.NotifyUpdateUpdate:
 		reg := getRegistrationByName(update.Name)
 		if reg == nil {
 			return fmt.Errorf("Could not find registration")
@@ -252,7 +251,7 @@ func updateRunningRegistrations(running map[string]*registrationInfo,
 			}
 		}
 		return fmt.Errorf("Could not find running registration")
-	case export.NotifyUpdateAdd:
+	case models.NotifyUpdateAdd:
 		reg := getRegistrationByName(update.Name)
 		if reg == nil {
 			return fmt.Errorf("Could not find registration")
