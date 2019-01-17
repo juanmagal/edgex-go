@@ -1,0 +1,30 @@
+# Default values for mosquitto
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+
+# images
+
+edgex_rules_engine:
+  name: "edgex-support-rulesengine"
+  port: 48075
+
+volumes:
+  data_db:
+    name: "db-data"
+    path: "/data/db"
+  logs:
+    name: "edgex-logs"
+    path: "/edgex/logs"
+  consul_config:
+    name: "consul-config"
+    path: "/consul/config"
+  consul_data:
+    name: "consul-data"
+    path: "/consul/data"
+
+hpa:
+  min: 1
+  max: 10
+  metric: cpu
+  utilization: 80

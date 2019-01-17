@@ -1,0 +1,7 @@
+dependencies:
+ - name: mosquitto
+   condition: mosquitto.enabled
+ - name: devicemqtt
+   condition: edgex_device_mqtt.enabled
+ - name: rulesengine
+   condition: edgex_rules_engine.enabled
