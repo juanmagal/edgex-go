@@ -17,9 +17,3 @@ edgex_device_mqtt:
   name: "edgex-device-mqtt"
   port: 49982
 
-hpa:
-  min: 1
-  max: 10
-  metric: cpu
-  utilization: 80
-

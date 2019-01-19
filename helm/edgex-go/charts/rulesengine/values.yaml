@@ -23,8 +23,3 @@ volumes:
     name: "consul-data"
     path: "/consul/data"
 
-hpa:
-  min: 1
-  max: 10
-  metric: cpu
-  utilization: 80

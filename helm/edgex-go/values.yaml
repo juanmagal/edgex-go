@@ -86,7 +86,7 @@ edgex_notifications:
   port: 48060
 
 edgex_rules_engine:
-  enabled: true
+  enabled: false
   name: "edgex-support-rulesengine"
   port: 48075
 
@@ -109,16 +109,21 @@ tolerations: []
 
 affinity: {}
 
-hpa:
-  min: 1
-  max: 10
-  metric: cpu
-  utilization: 80
+global:
+  hpa:
+    min: 1
+    max: 10
+    metric: cpu
+    utilization: 80
 
-namespace: slice1
+  namespace: slice1
 
-probes:
-   initial_delay: 5
-   timeout: 1
-   period: 15
-   delay: 15
+  serviceType: LoadBalancer
+
+  pullPolicy: Always
+
+  probes:
+    initial_delay: 5
+    timeout: 1
+    period: 15
+    delay: 15

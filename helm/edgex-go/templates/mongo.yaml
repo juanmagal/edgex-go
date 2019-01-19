@@ -4,7 +4,7 @@ metadata:
   labels:
     io.kompose.service: {{ .Values.mongo.name }}
   name: {{ .Values.mongo.name }}
-  namespace: {{ .Values.namespace }}
+  namespace: {{ .Values.global.namespace }}
 spec:
   ports:
   - name: "27017"
@@ -18,19 +18,19 @@ metadata:
   labels:
     io.kompose.service: {{ .Values.mongo.name }}
   name: {{ .Values.mongo.name }}
-  namespace: {{ .Values.namespace }}
+  namespace: {{ .Values.global.namespace }}
 spec:
   scaleTargetRef:
     apiVersion: extensions/v1beta1
     kind: Deployment
     name: {{ .Values.mongo.name }}
-  minReplicas: {{ .Values.hpa.min }}
-  maxReplicas: {{ .Values.hpa.max }}
+  minReplicas: {{ .Values.global.hpa.min }}
+  maxReplicas: {{ .Values.global.hpa.max }}
   metrics:
   - type: Resource
     resource:
-      name: {{ .Values.hpa.metric }}
-      targetAverageUtilization: {{ .Values.hpa.utilization }}
+      name: {{ .Values.global.hpa.metric }}
+      targetAverageUtilization: {{ .Values.global.hpa.utilization }}
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
@@ -38,7 +38,7 @@ metadata:
   labels:
     io.kompose.service: {{ .Values.mongo.name }}
   name: {{ .Values.mongo.name }}
-  namespace: {{ .Values.namespace }}
+  namespace: {{ .Values.global.namespace }}
 spec:
   template:
     metadata:

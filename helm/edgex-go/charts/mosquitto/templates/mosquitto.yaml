@@ -4,9 +4,9 @@ metadata:
   labels:
     io.kompose.service: {{ .Values.mosquitto.name }}
   name: {{ .Values.mosquitto.name }}
-  namespace: {{ .Values.namespace }}
+  namespace: {{ .Values.global.namespace }}
 spec:
-  type: LoadBalancer
+  type: {{ .Values.global.serviceType }}
   ports:
   - name: "MQTT"
     port: {{ .Values.mosquitto.ports.mqtt }}
@@ -21,7 +21,7 @@ metadata:
   labels:
     io.kompose.service: {{ .Values.mosquitto.name }}
   name: {{ .Values.mosquitto.name }}
-  namespace: {{ .Values.namespace }}
+  namespace: {{ .Values.global.namespace }}
 spec:
   replicas: {{ .Values.mosquitto.replicas }}
   template:
