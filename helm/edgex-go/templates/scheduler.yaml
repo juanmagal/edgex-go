@@ -50,13 +50,13 @@ spec:
         name: {{ .Values.edgex_scheduler.name }}
         ports:
         - containerPort: {{ .Values.edgex_scheduler.port }}
-        readinessProbe:
-          httpGet:
-            path: /api/v1/ping
-            port: {{ .Values.edgex_scheduler.port }}
-          initialDelaySeconds: {{ .Values.global.probes.initial_delay }}
-          timeoutSeconds: {{ .Values.global.probes.timeout }}
-          periodSeconds: {{ .Values.global.probes.period }}
+#        readinessProbe:
+#          httpGet:
+#            path: /api/v1/ping
+#            port: {{ .Values.edgex_scheduler.port }}
+#          initialDelaySeconds: {{ .Values.global.probes.initial_delay }}
+#          timeoutSeconds: {{ .Values.global.probes.timeout }}
+#          periodSeconds: {{ .Values.global.probes.period }}
         livenessProbe:
           httpGet:
             path: /api/v1/ping

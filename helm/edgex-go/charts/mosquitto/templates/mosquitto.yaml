@@ -8,9 +8,9 @@ metadata:
 spec:
   type: {{ .Values.global.serviceType }}
   ports:
-  - name: "MQTT"
+  - name: "mqtt"
     port: {{ .Values.mosquitto.ports.mqtt }}
-  - name: "HTTP"
+  - name: "http"
     port: {{ .Values.mosquitto.ports.http }}
   selector:
     io.kompose.service: {{ .Values.mosquitto.name }}

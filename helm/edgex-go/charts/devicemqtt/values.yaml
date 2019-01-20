@@ -1,3 +1,5 @@
+deviceMqttImage: juanman/docker-device-mqtt-go:prueba2
+
 volumes:
   data_db:
     name: "db-data"
