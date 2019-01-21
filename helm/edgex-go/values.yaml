@@ -114,7 +114,7 @@ global:
     metric: cpu
     utilization: 80
 
-  namespace: default
+#  namespace: default
 
   serviceType: LoadBalancer
 
