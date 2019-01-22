@@ -5,6 +5,9 @@ metadata:
   namespace: {{ .Values.global.namespace }}
   labels:
     io.kompose.service: {{ .Values.consul.name }}
+  annotations:
+    "helm.sh/hook": pre-install
+    "helm.sh/hook-delete-policy": before-hook-creation
 spec:
   ports:
     - port: {{ .Values.consul.ports.server }}
@@ -27,6 +30,9 @@ metadata:
     io.kompose.service: {{ .Values.consul.name }}
   name: {{ .Values.consul.name }}
   namespace: {{ .Values.global.namespace }}
+  annotations:
+    "helm.sh/hook": pre-install
+    "helm.sh/hook-delete-policy": before-hook-creation
 spec:
   scaleTargetRef:
     apiVersion: extensions/v1beta1
@@ -47,6 +53,9 @@ metadata:
     io.kompose.service: {{ .Values.consul.name }}
   name: {{ .Values.consul.name }}
   namespace: {{ .Values.global.namespace }}
+  annotations:
+    "helm.sh/hook": pre-install
+    "helm.sh/hook-delete-policy": before-hook-creation
 spec:
   template:
     metadata:

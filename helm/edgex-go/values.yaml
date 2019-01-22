@@ -4,23 +4,21 @@
 
 
 # images
-coreCommandImage: juanman/docker-core-command:latest
+coreCommandImage: juanman/docker-core-command-go:latest
 coreConsulImage: consul:1.3.1
 coreDataImage: juanman/docker-core-data-go:latest
 exportClientImage: juanman/docker-export-client-go:latest
 exportDistroImage: juanman/docker-export-distro-go:latest
 loggingImage: juanman/docker-support-logging-go:latest
 coreMetadataImage: juanman/docker-core-metadata-go:latest
-mongoImage: juanman/docker-edgex-mongo:latest
+mongoImage: edgexfoundry/docker-edgex-mongo:0.6.0
 notificationsImage: juanman/docker-support-notifications-go:latest
-rulesEngineImage: juanman/docker-support-rulesengine:latest
 schedulerImage: juanman/docker-support-scheduler-go:latest
-deviceMqttImage: juanman/docker-device-mqtt-go:prueba2
 configSeedImage: juanman/docker-core-config-seed-go:latest
 
 volumes:
   data_db:
-    name: "db-data"
+    name: "data-db"
     path: "/data/db"
   logs:
     name: "edgex-logs"
@@ -78,7 +76,7 @@ edgex_core_metadata:
   port: 48081
 
 mongo:
-  name: "edgex_mongo"
+  name: "edgex-mongo"
   port: 27017
 
 edgex_notifications:
@@ -116,7 +114,7 @@ global:
     metric: cpu
     utilization: 80
 
-  namespace: slice1
+#  namespace: default
 
   serviceType: LoadBalancer
 

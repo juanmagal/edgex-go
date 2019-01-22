@@ -64,7 +64,7 @@ spec:
         livenessProbe:
           httpGet:
             path: /api/v1/ping
-            port: {{ .Values.edgex_core_command.port }}
+            port: {{ .Values.edgex_core_data.ports.http }}
           initialDelaySeconds: {{ .Values.global.probes.delay }}
           timeoutSeconds: {{ .Values.global.probes.timeout }}
           periodSeconds: {{ .Values.global.probes.period }}

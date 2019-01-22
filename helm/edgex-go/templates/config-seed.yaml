@@ -5,9 +5,6 @@ metadata:
     io.kompose.service: {{ .Values.edgex_config_seed.name }}
   name: {{ .Values.edgex_config_seed.name }}
   namespace: {{ .Values.global.namespace }}
-  annotations:
-    "helm.sh/hook": pre-install
-    "helm.sh/hook-delete-policy": before-hook-creation
 spec:
   template:
     metadata:
@@ -27,7 +24,7 @@ spec:
           name: {{ .Values.volumes.consul_config.name }}
         - mountPath: {{ .Values.volumes.consul_data.path }}
           name: {{ .Values.volumes.consul_data.name }}
-      restartPolicy: Always
+      restartPolicy: OnFailure
       volumes:
       - name: {{ .Values.volumes.data_db.name }}
         hostPath:

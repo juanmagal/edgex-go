@@ -16,6 +16,12 @@ spec:
         name: edgex-support-scheduler
         ports:
         - containerPort: 48085
+        livenessProbe:
+          httpGet:
+            path: /api/v1/ping
+            port: 48085
+          initialDelaySeconds: 5
+          periodSeconds: 5
         resources: {}
         volumeMounts:
         - mountPath: /data/db
@@ -40,9 +46,3 @@ spec:
       - name: consul-data
         hostPath:
           path: /consul/data
-      livenessProbe:
-        httpGet:
-          path: /api/v1/ping
-          port: 48085
-        initialDelaySeconds: 5
-        periodSeconds: 5

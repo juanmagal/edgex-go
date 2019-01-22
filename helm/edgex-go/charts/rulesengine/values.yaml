@@ -4,6 +4,7 @@
 
 
 # images
+rulesEngineImage: juanman/docker-support-rulesengine:latest
 
 edgex_rules_engine:
   name: "edgex-support-rulesengine"
