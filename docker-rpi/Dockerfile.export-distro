@@ -1,0 +1,51 @@
+#
+# Copyright (c) 2017-2018
+# Mainflux
+# Cavium
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+#FROM balenalib/raspberry-pi-golang:jessie-build AS builder
+FROM balenalib/rpi-alpine-golang:1.11-3.8 AS builder
+
+# environment variables
+ENV GOPATH=/go
+ENV PATH=$GOPATH/bin:$PATH
+
+# set the working directory
+WORKDIR /go/src/github.com/edgexfoundry/edgex-go
+
+# The main mirrors are giving us timeout issues on builds periodically.
+# So we can try these.
+#RUN echo http://nl.alpinelinux.org/alpine/v3.7/main > /etc/apk/repositories; \
+#    echo http://nl.alpinelinux.org/alpine/v3.7/community >> /etc/apk/repositories
+
+# copy go source files
+COPY . .
+
+# build
+#RUN curl https://glide.sh/get | sh
+#RUN apt-get update && apt-get install apt-utils
+#RUN apt-get install libzmq3-dev libsodium-dev pkg-config build-essential git
+RUN apk update && apk add zeromq-dev libsodium-dev pkgconfig build-base glide
+RUN make prepare
+RUN make cmd/export-distro/export-distro
+
+FROM balenalib/rpi-alpine:3.8
+
+LABEL license='SPDX-License-Identifier: Apache-2.0' \
+      copyright='Copyright (c) 2017-2018: Mainflux, Cavium'
+
+# The main mirrors are giving us timeout issues on builds periodically.
+# So we can try these.
+#RUN echo http://nl.alpinelinux.org/alpine/v3.7/main > /etc/apk/repositories; \
+#    echo http://nl.alpinelinux.org/alpine/v3.7/community >> /etc/apk/repositories
+
+
+RUN apk --no-cache add zeromq
+#RUN apt-get update
+#RUN apt-get install libzmq3-dev
+COPY --from=builder /go/src/github.com/edgexfoundry/edgex-go/cmd/export-distro/export-distro /
+COPY --from=builder /go/src/github.com/edgexfoundry/edgex-go/cmd/export-distro/res/docker/configuration.toml /res/docker/configuration.toml
+ENTRYPOINT ["/export-distro","--consul","--profile=docker","--confdir=/res"]
