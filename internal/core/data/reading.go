@@ -14,12 +14,14 @@
 package data
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"io"
+
 	"github.com/edgexfoundry/edgex-go/internal/core/data/errors"
 	"github.com/edgexfoundry/edgex-go/internal/pkg/db"
 	contract "github.com/edgexfoundry/edgex-go/pkg/models"
-	"io"
 )
 
 func getAllReadings() (readings []contract.Reading, err error) {
@@ -197,8 +199,8 @@ func countReadings() (count int, err error) {
 	return count, nil
 }
 
-func getReadingsByDevice(deviceId string, limit int) (readings []contract.Reading, err error) {
-	if checkDevice(deviceId) != nil {
+func getReadingsByDevice(deviceId string, limit int, ctx context.Context) (readings []contract.Reading, err error) {
+	if checkDevice(deviceId, ctx) != nil {
 		LoggingClient.Error(fmt.Sprintf("error checking device %s %v", deviceId, err))
 
 		return []contract.Reading{}, err

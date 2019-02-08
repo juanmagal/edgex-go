@@ -11,12 +11,14 @@ import (
 	"time"
 
 	"github.com/edgexfoundry/edgex-go"
+	"github.com/edgexfoundry/edgex-go/pkg/clients/logging"
+	"github.com/gorilla/context"
+
 	"github.com/edgexfoundry/edgex-go/internal"
+	"github.com/edgexfoundry/edgex-go/internal/pkg/correlation"
 	"github.com/edgexfoundry/edgex-go/internal/pkg/startup"
 	"github.com/edgexfoundry/edgex-go/internal/pkg/usage"
 	"github.com/edgexfoundry/edgex-go/internal/support/scheduler"
-	"github.com/edgexfoundry/edgex-go/pkg/clients/logging"
-	"github.com/gorilla/context"
 )
 
 func main() {
@@ -71,7 +73,7 @@ func main() {
 }
 
 func logBeforeInit(err error) {
-	scheduler.LoggingClient = logger.NewClient(internal.CoreCommandServiceKey, false, "", logger.InfoLog)
+	scheduler.LoggingClient = logger.NewClient(internal.SupportSchedulerServiceKey, false, "", logger.InfoLog)
 	scheduler.LoggingClient.Error(err.Error())
 }
 
@@ -85,6 +87,7 @@ func listenForInterrupt(errChan chan error) {
 
 func startHttpServer(errChan chan error, port int) {
 	go func() {
+		correlation.LoggingClient = scheduler.LoggingClient
 		r := scheduler.LoadRestRoutes()
 		errChan <- http.ListenAndServe(":"+strconv.Itoa(port), context.ClearHandler(r))
 	}()

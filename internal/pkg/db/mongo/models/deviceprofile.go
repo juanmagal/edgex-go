@@ -33,15 +33,12 @@ type PropertyValue struct {
 	Maximum      string `bson:"maximum"`      // Maximum value that can be get/set from this property
 	DefaultValue string `bson:"defaultValue"` // Default value set to this property if no argument is passed
 	Size         string `bson:"size"`         // Size of this property in its type  (i.e. bytes for numeric types, characters for string types)
-	Word         string `bson:"word"`         // Word size of property used for endianness
-	LSB          string `bson:"lsb"`          // Endianness setting for a property
 	Mask         string `bson:"mask"`         // Mask to be applied prior to get/set of property
 	Shift        string `bson:"shift"`        // Shift to be applied after masking, prior to get/set of property
 	Scale        string `bson:"scale"`        // Multiplicative factor to be applied after shifting, prior to get/set of property
 	Offset       string `bson:"offset"`       // Additive factor to be applied after multiplying, prior to get/set of property
 	Base         string `bson:"base"`         // Base for property to be applied to, leave 0 for no power operation (i.e. base ^ property: 2 ^ 10)
 	Assertion    string `bson:"assertion"`    // Required value of the property, set for checking error state.  Failing an assertion condition will mark the device with an error state
-	Signed       bool   `bson:"signed"`       // Treat the property as a signed or unsigned value
 	Precision    string `bson:"precision"`
 }
 
@@ -56,7 +53,7 @@ type ProfileProperty struct {
 	Units Units         `bson:"units"`
 }
 
-type DeviceObject struct {
+type DeviceResource struct {
 	Description string                 `bson:"description"`
 	Name        string                 `bson:"name"`
 	Tag         string                 `bson:"tag"`
@@ -92,8 +89,7 @@ type DeviceProfile struct {
 	Manufacturer    string            `bson:"manufacturer"`
 	Model           string            `bson:"model"`
 	Labels          []string          `bson:"labels"`
-	Objects         interface{}       `bson:"objects"`
-	DeviceResources []DeviceObject    `bson:"deviceResources"`
+	DeviceResources []DeviceResource  `bson:"deviceResources"`
 	Resources       []ProfileResource `bson:"resources"`
 	Commands        []mgo.DBRef       `bson:"commands"`
 }
@@ -109,14 +105,13 @@ func (dp *DeviceProfile) ToContract(transform commandTransform) (c contract.Devi
 	c.Manufacturer = dp.Manufacturer
 	c.Model = dp.Model
 	c.Labels = dp.Labels
-	c.Objects = dp.Objects
 	c.Created = dp.Created
 	c.Modified = dp.Modified
 	c.Origin = dp.Origin
 	c.Description = dp.Description
 
 	for _, dr := range dp.DeviceResources {
-		var cdo contract.DeviceObject
+		var cdo contract.DeviceResource
 
 		cdo.Description = dr.Description
 		cdo.Name = dr.Name
@@ -128,15 +123,12 @@ func (dp *DeviceProfile) ToContract(transform commandTransform) (c contract.Devi
 		cdo.Properties.Value.Maximum = dr.Properties.Value.Maximum
 		cdo.Properties.Value.DefaultValue = dr.Properties.Value.DefaultValue
 		cdo.Properties.Value.Size = dr.Properties.Value.Size
-		cdo.Properties.Value.Word = dr.Properties.Value.Word
-		cdo.Properties.Value.LSB = dr.Properties.Value.LSB
 		cdo.Properties.Value.Mask = dr.Properties.Value.Mask
 		cdo.Properties.Value.Shift = dr.Properties.Value.Shift
 		cdo.Properties.Value.Scale = dr.Properties.Value.Scale
 		cdo.Properties.Value.Offset = dr.Properties.Value.Offset
 		cdo.Properties.Value.Base = dr.Properties.Value.Base
 		cdo.Properties.Value.Assertion = dr.Properties.Value.Assertion
-		cdo.Properties.Value.Signed = dr.Properties.Value.Signed
 		cdo.Properties.Value.Precision = dr.Properties.Value.Precision
 
 		cdo.Properties.Units.Type = dr.Properties.Units.Type
@@ -201,7 +193,6 @@ func (dp *DeviceProfile) FromContract(from contract.DeviceProfile, transform com
 	dp.Manufacturer = from.Manufacturer
 	dp.Model = from.Model
 	dp.Labels = from.Labels
-	dp.Objects = from.Objects
 
 	dp.Created = from.Created
 	dp.Modified = from.Modified
@@ -209,7 +200,7 @@ func (dp *DeviceProfile) FromContract(from contract.DeviceProfile, transform com
 	dp.Description = from.Description
 
 	for _, dr := range from.DeviceResources {
-		var do DeviceObject
+		var do DeviceResource
 
 		do.Description = dr.Description
 		do.Name = dr.Name
@@ -221,15 +212,12 @@ func (dp *DeviceProfile) FromContract(from contract.DeviceProfile, transform com
 		do.Properties.Value.Maximum = dr.Properties.Value.Maximum
 		do.Properties.Value.DefaultValue = dr.Properties.Value.DefaultValue
 		do.Properties.Value.Size = dr.Properties.Value.Size
-		do.Properties.Value.Word = dr.Properties.Value.Word
-		do.Properties.Value.LSB = dr.Properties.Value.LSB
 		do.Properties.Value.Mask = dr.Properties.Value.Mask
 		do.Properties.Value.Shift = dr.Properties.Value.Shift
 		do.Properties.Value.Scale = dr.Properties.Value.Scale
 		do.Properties.Value.Offset = dr.Properties.Value.Offset
 		do.Properties.Value.Base = dr.Properties.Value.Base
 		do.Properties.Value.Assertion = dr.Properties.Value.Assertion
-		do.Properties.Value.Signed = dr.Properties.Value.Signed
 		do.Properties.Value.Precision = dr.Properties.Value.Precision
 
 		do.Properties.Units.Type = dr.Properties.Units.Type

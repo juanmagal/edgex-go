@@ -9,6 +9,7 @@
 package client
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -253,6 +254,7 @@ func updateReg(w http.ResponseWriter, r *http.Request) {
 }
 
 func delRegByID(w http.ResponseWriter, r *http.Request) {
+
 	// URL parameters
 	vars := mux.Vars(r)
 	id := vars["id"]
@@ -303,7 +305,7 @@ func delRegByName(w http.ResponseWriter, r *http.Request) {
 
 func notifyUpdatedRegistrations(update models.NotifyUpdate) {
 	go func() {
-		err := dc.NotifyRegistrations(update)
+		err := dc.NotifyRegistrations(update, context.Background())
 		if err != nil {
 			LoggingClient.Error(fmt.Sprintf("error from distro: %s", err.Error()))
 		}
