@@ -20,8 +20,8 @@ import (
 	"time"
 
 	"github.com/cisco/senml"
+	contract "github.com/edgexfoundry/edgex-go/pkg/models"
 
-	"github.com/edgexfoundry/edgex-go/pkg/models"
 	"github.com/google/uuid"
 )
 
@@ -38,7 +38,7 @@ const (
 	full
 )
 
-func (jsonTr jsonFormatter) Format(event *models.Event) []byte {
+func (jsonTr jsonFormatter) Format(event *contract.Event) []byte {
 
 	b, err := json.Marshal(event)
 	if err != nil {
@@ -51,7 +51,7 @@ func (jsonTr jsonFormatter) Format(event *models.Event) []byte {
 type xmlFormatter struct {
 }
 
-func (xmlTr xmlFormatter) Format(event *models.Event) []byte {
+func (xmlTr xmlFormatter) Format(event *contract.Event) []byte {
 	b, err := xml.Marshal(event)
 	if err != nil {
 		LoggingClient.Error(fmt.Sprintf("Error parsing XML. Error: %s", err.Error()))
@@ -65,7 +65,7 @@ type thingsboardJSONFormatter struct {
 
 // ThingsBoard JSON formatter
 // https://thingsboard.io/docs/reference/gateway-mqtt-api/#telemetry-upload-api
-func (thingsboardjsonTr thingsboardJSONFormatter) Format(event *models.Event) []byte {
+func (thingsboardjsonTr thingsboardJSONFormatter) Format(event *contract.Event) []byte {
 
 	type Device struct {
 		Ts     int64             `json:"ts"`
@@ -147,7 +147,7 @@ type azureFormatter struct {
 }
 
 // Format method does all foramtting job.
-func (af azureFormatter) Format(event *models.Event) []byte {
+func (af azureFormatter) Format(event *contract.Event) []byte {
 	am, err := newAzureMessage()
 	if err != nil {
 		LoggingClient.Error(fmt.Sprintf("Error creating a new Azure message: %s", err))
@@ -173,7 +173,7 @@ func (af azureFormatter) Format(event *models.Event) []byte {
 type awsFormatter struct {
 }
 
-func (af awsFormatter) Format(event *models.Event) []byte {
+func (af awsFormatter) Format(event *contract.Event) []byte {
 	reported := map[string]interface{}{}
 
 	for _, reading := range event.Readings {
@@ -215,7 +215,7 @@ func (af awsFormatter) Format(event *models.Event) []byte {
 type noopFormatter struct {
 }
 
-func (noopFmt noopFormatter) Format(event *models.Event) []byte {
+func (noopFmt noopFormatter) Format(event *contract.Event) []byte {
 	return []byte{}
 }
 
@@ -259,7 +259,7 @@ type biotFormatter struct {
 }
 
 // Format method does all foramtting job.
-func (af biotFormatter) Format(event *models.Event) []byte {
+func (af biotFormatter) Format(event *contract.Event) []byte {
 	bm, err := newBIoTMessage()
 	if err != nil {
 		LoggingClient.Error(fmt.Sprintf("error creating a new BIoT message: %s", err))
@@ -287,7 +287,7 @@ type senMLJSONFormatter struct {
 }
 
 // SenML JSON formatter
-func (senMLjsonTr senMLJSONFormatter) Format(event *models.Event) []byte {
+func (senMLjsonTr senMLJSONFormatter) Format(event *contract.Event) []byte {
 
 	readings := []senml.SenMLRecord{}
 
