@@ -12,6 +12,11 @@ description: |
   for this snap can be found at: https://github.com/edgexfoundry/edgex-go
 icon: snap/local/assets/edgex-snap-icon.png
 
+# TODO: add armhf here when that's supported
+architectures: 
+  - arm64
+  - amd64
+
 # TODO: upgrade to stable before releasing to beta/candidate/stable
 grade: devel
 confinement: strict
@@ -632,7 +637,7 @@ parts:
       - -usr/share/alsa
   cassandra:
     plugin: dump
-    source: http://apache.claz.org/cassandra/3.11.3/apache-cassandra-3.11.3-bin.tar.gz
+    source: http://apache.claz.org/cassandra/3.11.4/apache-cassandra-3.11.4-bin.tar.gz
     source-type: tar
     build-packages:
       - ant-optional
