@@ -15,6 +15,7 @@ import (
 	contract "github.com/edgexfoundry/edgex-go/pkg/models"
 
 	"github.com/influxdata/influxdb/client/v2"
+	"encoding/base64"
 )
 
 const (
@@ -72,11 +73,33 @@ func (sender *influxdbSender) Send(data []byte, event *models.Event) bool {
 	}
 
 	for _, reading := range event.Readings {
-		value, err := strconv.ParseFloat(reading.Value, 64)
 
-		if err != nil {
+		//value, err := strconv.ParseFloat(reading.Value, 64)
+
+
+
+		//if err != nil {
+			// not a valid numerical reading value, just ignore it
+			//continue
+		//}
+
+		value := 0.0
+
+		switch {
+		case reading.Type == contract.String:
 			// not a valid numerical reading value, just ignore it
 			continue
+		case reading.Type == contract.Bool:
+			// not a valid numerical reading value, just ignore it
+			continue
+		case reading.Type == contract.Float64:
+			b, err := base64.StdEncoding.DecodeString(reading.Value)
+			if err != nil {
+				LoggingClient.Error(fmt.Sprintf("Error parsing SenML Float value. Error: %s", err.Error()))
+			} else {
+				value = Float64frombytes(b)
+			}
+			// SenML Data not supported yet
 		}
 
 		fields := map[string]interface{}{
