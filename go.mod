@@ -3,6 +3,7 @@ module github.com/edgexfoundry/edgex-go
 require (
 	github.com/BurntSushi/toml v0.3.1
 	github.com/cenkalti/backoff v2.1.1+incompatible // indirect
+	github.com/cisco/senml v0.0.0-20181031221301-910a55054e16
 	github.com/eclipse/paho.mqtt.golang v1.1.1
 	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
 	github.com/go-kit/kit v0.8.0
@@ -23,6 +24,7 @@ require (
 	github.com/pkg/errors v0.8.1
 	github.com/robfig/cron v0.0.0-20180505203441-b41be1df6967
 	github.com/stretchr/testify v1.3.0
+	github.com/ugorji/go/codec v0.0.0-20190204201341-e444a5086c43 // indirect
 	gopkg.in/eapache/queue.v1 v1.1.0
 	gopkg.in/yaml.v2 v2.2.1
 )

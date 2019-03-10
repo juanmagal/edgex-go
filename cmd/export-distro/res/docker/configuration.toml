@@ -1,6 +1,6 @@
 [Writable]
-MarkPushed = false
-LogLevel = 'INFO'
+MarkPushed = true
+LogLevel = 'WARN'
 
 [Service]
 BootTimeout = 30000

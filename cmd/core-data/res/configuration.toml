@@ -4,7 +4,7 @@ MetaDataCheck = false
 PersistData = true
 ServiceUpdateLastConnected = false
 ValidateCheck = false
-LogLevel = 'INFO'
+LogLevel = 'WARN'
 
 [Service]
 BootTimeout = 30000
@@ -13,7 +13,7 @@ CheckInterval = '10s'
 Host = 'localhost'
 Port = 48080
 Protocol = 'http'
-ReadMaxLimit = 100
+ReadMaxLimit = 1000
 StartupMsg = 'This is the Core Data Microservice'
 Timeout = 5000
 
