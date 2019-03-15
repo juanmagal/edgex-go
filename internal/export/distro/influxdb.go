@@ -64,7 +64,7 @@ func (sender *influxdbSender) Send(data []byte, event *models.Event) bool {
 
 	bp, err := client.NewBatchPoints(client.BatchPointsConfig{
 		Database:  sender.database,
-		Precision: "us",
+		Precision: "s",
 	})
 
 	if err != nil {
@@ -118,7 +118,7 @@ func (sender *influxdbSender) Send(data []byte, event *models.Event) bool {
 			"readings",
 			tags,
 			fields,
-			time.Now(),
+			//time.Now(),
 		)
 
 		if err != nil {

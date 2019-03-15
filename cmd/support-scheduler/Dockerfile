@@ -8,11 +8,7 @@
 
 FROM golang:1.11.2-alpine3.7 AS builder
 
-# environment variables
-ENV GOPATH=/go
-ENV PATH=$GOPATH/bin:$PATH
-
-# set the working directory
+ENV GO111MODULE=on
 WORKDIR /go/src/github.com/edgexfoundry/edgex-go
 
 # The main mirrors are giving us timeout issues on builds periodically.
@@ -20,12 +16,14 @@ WORKDIR /go/src/github.com/edgexfoundry/edgex-go
 RUN echo http://nl.alpinelinux.org/alpine/v3.7/main > /etc/apk/repositories; \
     echo http://nl.alpinelinux.org/alpine/v3.7/community >> /etc/apk/repositories
 
-# copy go source files
-COPY . .
+RUN apk update && apk add make git
 
-# build
-RUN apk update && apk add make glide git
-RUN make prepare
+COPY go.mod .
+COPY go.sum .
+
+RUN go mod download
+
+COPY . .
 RUN make cmd/support-scheduler/support-scheduler
 
 FROM scratch

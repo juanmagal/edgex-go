@@ -4,7 +4,7 @@ MetaDataCheck = false
 PersistData = true
 ServiceUpdateLastConnected = false
 ValidateCheck = false
-LogLevel = 'INFO'
+LogLevel = 'WARN'
 
 [Service]
 BootTimeout = 30000

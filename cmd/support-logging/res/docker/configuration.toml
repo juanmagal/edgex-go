@@ -1,6 +1,6 @@
 [Writable]
 Persistence = 'database'
-LogLevel = 'INFO'
+LogLevel = 'WARN'
 
 [Service]
 BootTimeout = 30000
