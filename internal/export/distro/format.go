@@ -302,12 +302,12 @@ func (senMLjsonTr senMLJSONFormatter) Format(event *contract.Event) []byte {
 
 
 		switch  {
-		case v.Type == models.String:
+		case v.Type == contract.String:
 			reading.StringValue = v.Value
-		case v.Type == models.Bool:
+		case v.Type == contract.Bool:
 			b,_ := strconv.ParseBool(v.Value)
 			reading.BoolValue = &b
-		case v.Type == models.Float64:
+		case v.Type == contract.Float64:
 			b, err := base64.StdEncoding.DecodeString(v.Value)
 			if err != nil {
 				LoggingClient.Error(fmt.Sprintf("Error parsing SenML Float value. Error: %s", err.Error()))
